@@ -1,0 +1,18 @@
+dataset_path: data/mini_set.jsonl
+
+model:
+  provider: "dummy"
+  name: "dummy"
+  price:
+    input_per_1k: 0.5
+    output_per_1k: 1.5
+
+strategy:
+  k_list: [1, 2, 4, 8]
+  max_steps: 12
+  temperature: 0.4
+
+runtime:
+  seed: 42
+  save_csv: true
+  save_json: true

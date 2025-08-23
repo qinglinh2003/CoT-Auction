@@ -1,0 +1,12 @@
+{"id":"arith_001","category":"arithmetic","prompt":"What is 27*14? Give a number.","answer":"378","judge":"exact"}
+{"id":"arith_002","category":"arithmetic","prompt":"If x=12 and y=7, what is (x+y)^2?","answer":"361","judge":"exact"}
+{"id":"arith_003","category":"arithmetic","prompt":"A shop sold 48 items at $7 each. Total revenue?","answer":"336","judge":"exact"}
+{"id":"unit_001","category":"unit","prompt":"Convert 3.5 kilometers to meters. Number only.","answer":"3500","judge":"exact"}
+{"id":"unit_002","category":"unit","prompt":"How many minutes are in 2.5 hours?","answer":"150","judge":"exact"}
+{"id":"unit_003","category":"unit","prompt":"Convert 5 pounds to ounces. (1 lb = 16 oz)","answer":"80","judge":"exact"}
+{"id":"date_001","category":"date","prompt":"What day of the week was 2024-02-29?","answer":"Thursday","judge":"exact"}
+{"id":"date_002","category":"date","prompt":"If today is 2025-08-23, what date is 30 days later? (YYYY-MM-DD)","answer":"2025-09-22","judge":"exact"}
+{"id":"date_003","category":"date","prompt":"How many days between 2025-01-01 and 2025-03-01?","answer":"59","judge":"exact"}
+{"id":"logic_001","category":"logic","prompt":"All bloops are razzes. All razzes are flims. Are all bloops flims? Answer Yes/No.","answer":"Yes","judge":"regex","pattern":"^(?i)yes$"}
+{"id":"logic_002","category":"logic","prompt":"If exactly one of A or B is true, and A is false, is B true? Answer Yes/No.","answer":"Yes","judge":"regex","pattern":"^(?i)yes$"}
+{"id":"logic_003","category":"logic","prompt":"Tom is older than Jim. Jim is older than Amy. Is Tom older than Amy? Answer Yes/No.","answer":"Yes","judge":"regex","pattern":"^(?i)yes$"}
