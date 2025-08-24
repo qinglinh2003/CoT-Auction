@@ -3,6 +3,8 @@ from typing import List, Dict, Any
 from cot_auction.core.parsing import parse_final
 from cot_auction.core.metrics import judge_one, aggregate_metrics
 from cot_auction.core.costing import to_token_cost
+from tqdm import tqdm  
+
 
 def _cfg_obj(k: int, strat: Dict[str, Any]):
     return type("Cfg", (), {
@@ -12,9 +14,19 @@ def _cfg_obj(k: int, strat: Dict[str, Any]):
     })()
 
 def evaluate_dataset(adapter, dataset: List[Dict[str, Any]], strat: Dict[str, Any], price_cfg: Dict[str, float]):
-    records = []
-    for item in dataset:
+    records: List[Dict[str, Any]] = []
+    total = len(dataset) * len(strat["k_list"])
+    done = 0
+    pbar = tqdm(total=total, desc="Evaluating", unit="call") if tqdm else None
+
+    for qi, item in enumerate(dataset, 1):
         for k in strat["k_list"]:
+            if pbar:
+                pbar.set_postfix(q=qi, k=k)
+            else:
+                done += 1
+                print(f"[RUN] {done}/{total} | Q{qi}/{len(dataset)} | k={k} | id={item['id']}", flush=True)
+
             cfg = _cfg_obj(k, strat)
             gen = adapter.generate_chains(item["prompt"], cfg=cfg)
 
@@ -34,5 +46,12 @@ def evaluate_dataset(adapter, dataset: List[Dict[str, Any]], strat: Dict[str, An
                 "token_input": token_in, "token_output": token_out,
                 "cost_usd": cost["usd"], "latency_s": latency
             })
+
+            if pbar:
+                pbar.update(1)
+
+    if pbar:
+        pbar.close()
+
     report = aggregate_metrics(records)
     return records, report
