@@ -1,3 +1,4 @@
+cat > app_streamlit.py << 'PY'
 import os, glob, json, io
 import numpy as np
 import pandas as pd
@@ -70,18 +71,31 @@ def reco_iso_x(stats_df, budget):
     row = stats_df.sort_values(["x_mean","k"]).iloc[0]
     return dict(feasible=False, k=int(row.k), acc=row.acc_mean, x=row.x_mean)
 
+def get_qp():
+    try:
+        return st.experimental_get_query_params()
+    except:
+        return {}
+
+def set_qp(d):
+    try:
+        st.experimental_set_query_params(**d)
+    except:
+        pass
+
 st.title("CoT Auction (Demo)")
 st.caption("Tune the reasoning budget and see the accuracy–cost/latency trade-off. Pareto frontier, iso-target recommendations, and drill-down chains.")
 
 default_records = latest_file("outputs/records_*.csv")
 default_details = latest_file("outputs/details_*.json")
 default_report  = latest_file("outputs/report_*.json")
+qp = get_qp()
 
 with st.sidebar:
     st.subheader("Data sources")
-    rec_path = st.text_input("Records CSV path", value=default_records or "")
-    det_path = st.text_input("Details JSON path", value=default_details or "")
-    rep_path = st.text_input("Report JSON path",  value=default_report or "")
+    rec_path = st.text_input("Records CSV path", value=qp.get("rec", [default_records or ""])[0])
+    det_path = st.text_input("Details JSON path", value=qp.get("det", [default_details or ""])[0])
+    rep_path = st.text_input("Report JSON path",  value=qp.get("rep", [default_report or ""])[0])
 
     if not rec_path or not os.path.exists(rec_path):
         st.error("Records CSV not found. Run the evaluator to generate outputs/records_*.csv.")
@@ -92,9 +106,13 @@ with st.sidebar:
     df = load_records(rec_path)
 
     cats = ["All"] + sorted(df["category"].unique().tolist())
-    sel_cat = st.selectbox("Category", cats, index=0)
+    cat_default = qp.get("cat", ["All"])[0]
+    cat_default = cat_default if cat_default in cats else "All"
+    sel_cat = st.selectbox("Category", cats, index=cats.index(cat_default))
 
-    x_mode = st.radio("X-axis metric", ["Cost (USD)", "Latency (s)"], horizontal=True)
+    x_mode_default = qp.get("x", ["cost"])[0]
+    x_mode = st.radio("X-axis metric", ["Cost (USD)", "Latency (s)"], horizontal=True,
+                      index=(0 if x_mode_default=="cost" else 1))
     x_col = "cost_usd" if x_mode.startswith("Cost") else "latency_s"
     x_label = "Average cost (USD)" if x_col=="cost_usd" else "Average latency (s)"
 
@@ -102,12 +120,35 @@ with st.sidebar:
     st.subheader("Recommendation targets")
     col_a, col_b = st.columns(2)
     with col_a:
-        iso_acc = st.number_input("Target accuracy (iso-accuracy)", min_value=0.5, max_value=1.0, value=0.90, step=0.01)
+        try:
+            acc_default = float(qp.get("acc", [0.90])[0])
+        except:
+            acc_default = 0.90
+        iso_acc = st.number_input("Target accuracy (iso-accuracy)", min_value=0.5, max_value=1.0, value=acc_default, step=0.01)
     with col_b:
         default_budget = float(df[x_col].mean() or 0.0)
-        iso_x = st.number_input(f"Budget (iso-{ 'cost' if x_col=='cost_usd' else 'latency' })", min_value=0.0, value=default_budget, step=0.01, format="%.2f")
+        try:
+            budget_default = float(qp.get("budget", [default_budget])[0])
+        except:
+            budget_default = default_budget
+        iso_x = st.number_input(f"Budget (iso-{ 'cost' if x_col=='cost_usd' else 'latency' })", min_value=0.0, value=budget_default, step=0.01, format="%.2f")
 
-    show_dominated = st.checkbox("Dim dominated points", value=True)
+    dom_default = qp.get("dom", ["1"])[0] == "1"
+    show_dominated = st.checkbox("Dim dominated points", value=dom_default)
+
+    st.markdown("---")
+    if st.button("Share this view (update URL)"):
+        set_qp({
+            "rec": [rec_path],
+            "det": [det_path],
+            "rep": [rep_path],
+            "cat": [sel_cat],
+            "x": ["cost" if x_col=="cost_usd" else "lat"],
+            "acc": [f"{iso_acc:.2f}"],
+            "budget": [f"{iso_x:.4f}"],
+            "dom": ["1" if show_dominated else "0"],
+        })
+        st.success("URL updated. Copy it from the browser address bar.")
 
 left, right = st.columns([2, 1], gap="large")
 
@@ -158,10 +199,8 @@ with left:
         st.dataframe(rec_df)
         md_lines = ["# CoT Auction Recommendations\n"]
         for r in rec_rows:
-            md_lines.append(f"- [{r['category']}] iso-acc {r['iso_accuracy_target']:.2f}: k={r['k_for_iso_accuracy']} "
-                            f"(acc={r['acc']:.3f}, x={r['x']:.4f}, feasible={r['feasible']})")
-            md_lines.append(f"  [{r['category']}] iso-budget {r['iso_budget']:.2f}: k={r['k_for_iso_budget']} "
-                            f"(acc={r['acc2']:.3f}, x={r['x2']:.4f}, feasible={r['feasible2']})")
+            md_lines.append(f"- [{r['category']}] iso-acc {r['iso_accuracy_target']:.2f}: k={r['k_for_iso_accuracy']} (acc={r['acc']:.3f}, x={r['x']:.4f}, feasible={r['feasible']})")
+            md_lines.append(f"  [{r['category']}] iso-budget {r['iso_budget']:.2f}: k={r['k_for_iso_budget']} (acc={r['acc2']:.3f}, x={r['x2']:.4f}, feasible={r['feasible2']})")
         md_blob = "\n".join(md_lines).encode("utf-8")
         st.download_button("Download recommendations (Markdown)", data=md_blob, file_name="recommendations.md", mime="text/markdown")
 
@@ -206,4 +245,5 @@ with right:
         st.info("Details JSON not provided, drill-down panel disabled.")
 
 st.markdown("---")
-st.caption("Note: If cost is zero with local models, switch X-axis to latency to compare speed vs accuracy.")
+st.caption("Note: If cost is zero with local models, switch X-axis to latency to compare speed vs accuracy. Use the sidebar button to update the URL as a shareable permalink.")
+PY
