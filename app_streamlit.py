@@ -1,5 +1,4 @@
-import os, glob, json
-from collections import defaultdict
+import os, glob, json, io
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -36,43 +35,43 @@ def load_details(path):
         idx[key] = d
     return data, idx
 
-def aggregate_by_k(df, category=None):
+def aggregate_by_k(df, category=None, x_col="cost_usd"):
     view = df if category in (None, "All") else df[df["category"]==category]
     stats = view.groupby("k").agg(
         acc_mean=("acc","mean"),
         acc_std =("acc",lambda x: x.std(ddof=1) if len(x)>1 else 0.0),
-        cost_mean=("cost_usd","mean"),
-        cost_std =("cost_usd",lambda x: x.std(ddof=1) if len(x)>1 else 0.0),
-    ).reset_index().sort_values("cost_mean")
+        x_mean =(x_col,"mean"),
+        x_std  =(x_col,lambda x: x.std(ddof=1) if len(x)>1 else 0.0),
+    ).reset_index().sort_values("x_mean")
     return stats
 
-def pareto_front(points):
+def pareto_front(points_df):
     front = []
     best = -1.0
-    for _, p in points.sort_values("cost_mean").iterrows():
+    for _, p in points_df.sort_values("x_mean").iterrows():
         if p["acc_mean"] > best:
             front.append(p)
             best = p["acc_mean"]
-    return pd.DataFrame(front) if front else points.iloc[0:0]
+    return pd.DataFrame(front) if front else points_df.iloc[0:0]
 
 def reco_iso_accuracy(stats_df, target):
     feas = stats_df[stats_df["acc_mean"]>=target]
     if len(feas):
-        row = feas.sort_values(["cost_mean","k"]).iloc[0]
-        return dict(feasible=True, k=int(row.k), acc=row.acc_mean, cost=row.cost_mean)
+        row = feas.sort_values(["x_mean","k"]).iloc[0]
+        return dict(feasible=True, k=int(row.k), acc=row.acc_mean, x=row.x_mean)
     row = stats_df.sort_values(["acc_mean","k"], ascending=[False,True]).iloc[0]
-    return dict(feasible=False, k=int(row.k), acc=row.acc_mean, cost=row.cost_mean)
+    return dict(feasible=False, k=int(row.k), acc=row.acc_mean, x=row.x_mean)
 
-def reco_iso_cost(stats_df, budget):
-    feas = stats_df[stats_df["cost_mean"]<=budget]
+def reco_iso_x(stats_df, budget):
+    feas = stats_df[stats_df["x_mean"]<=budget]
     if len(feas):
         row = feas.sort_values(["acc_mean","k"], ascending=[False,True]).iloc[0]
-        return dict(feasible=True, k=int(row.k), acc=row.acc_mean, cost=row.cost_mean)
-    row = stats_df.sort_values(["cost_mean","k"]).iloc[0]
-    return dict(feasible=False, k=int(row.k), acc=row.acc_mean, cost=row.cost_mean)
+        return dict(feasible=True, k=int(row.k), acc=row.acc_mean, x=row.x_mean)
+    row = stats_df.sort_values(["x_mean","k"]).iloc[0]
+    return dict(feasible=False, k=int(row.k), acc=row.acc_mean, x=row.x_mean)
 
 st.title("CoT Auction (Demo)")
-st.caption("Tune the reasoning budget and see the accuracy–cost trade-off. Pareto frontier, iso-accuracy/iso-cost recommendations, and drill-down chains.")
+st.caption("Tune the reasoning budget and see the accuracy–cost/latency trade-off. Pareto frontier, iso-target recommendations, and drill-down chains.")
 
 default_records = latest_file("outputs/records_*.csv")
 default_details = latest_file("outputs/details_*.json")
@@ -95,22 +94,26 @@ with st.sidebar:
     cats = ["All"] + sorted(df["category"].unique().tolist())
     sel_cat = st.selectbox("Category", cats, index=0)
 
+    x_mode = st.radio("X-axis metric", ["Cost (USD)", "Latency (s)"], horizontal=True)
+    x_col = "cost_usd" if x_mode.startswith("Cost") else "latency_s"
+    x_label = "Average cost (USD)" if x_col=="cost_usd" else "Average latency (s)"
+
     st.markdown("---")
     st.subheader("Recommendation targets")
     col_a, col_b = st.columns(2)
     with col_a:
         iso_acc = st.number_input("Target accuracy (iso-accuracy)", min_value=0.5, max_value=1.0, value=0.90, step=0.01)
     with col_b:
-        iso_cost = st.number_input("Budget (iso-cost, $)", min_value=0.0, value=float(df["cost_usd"].mean() or 0.0), step=0.01, format="%.2f")
+        default_budget = float(df[x_col].mean() or 0.0)
+        iso_x = st.number_input(f"Budget (iso-{ 'cost' if x_col=='cost_usd' else 'latency' })", min_value=0.0, value=default_budget, step=0.01, format="%.2f")
 
     show_dominated = st.checkbox("Dim dominated points", value=True)
-    st.caption("Dominated = worse accuracy at same cost or higher cost at same accuracy.")
 
 left, right = st.columns([2, 1], gap="large")
 
 with left:
-    st.subheader("Pareto chart (Accuracy vs Cost)")
-    stats = aggregate_by_k(df, category=sel_cat)
+    st.subheader(f"Pareto chart (Accuracy vs { 'Cost' if x_col=='cost_usd' else 'Latency' })")
+    stats = aggregate_by_k(df, category=sel_cat, x_col=x_col)
     if stats.empty:
         st.info("No data to display.")
     else:
@@ -122,32 +125,51 @@ with left:
             kwargs = dict(fmt='o', capsize=3)
             if show_dominated and (int(r.k) not in front_k):
                 kwargs.update(dict(alpha=0.35))
-            ax.errorbar(r.cost_mean, r.acc_mean, xerr=r.cost_std, yerr=r.acc_std, **kwargs)
-            ax.annotate(f'k={int(r.k)}', (r.cost_mean, r.acc_mean), xytext=(3,3), textcoords="offset points",
+            ax.errorbar(r.x_mean, r.acc_mean, xerr=r.x_std, yerr=r.acc_std, **kwargs)
+            ax.annotate(f'k={int(r.k)}', (r.x_mean, r.acc_mean), xytext=(3,3), textcoords="offset points",
                         fontsize=9, alpha=(0.5 if (show_dominated and int(r.k) not in front_k) else 1.0))
         if len(front) >= 2:
-            ax.plot(front["cost_mean"], front["acc_mean"], linewidth=2)
-        ax.set_xlabel("Average cost (USD)")
+            ax.plot(front["x_mean"], front["acc_mean"], linewidth=2)
+        ax.set_xlabel(x_label)
         ax.set_ylabel("Accuracy")
         ax.set_ylim(0, 1.0)
         ax.grid(True, alpha=0.2)
         st.pyplot(fig, clear_figure=True)
 
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=160)
+        st.download_button("Download chart PNG", data=buf.getvalue(), file_name="pareto_chart.png", mime="image/png")
+
     st.subheader("Recommendations by category")
     rec_rows = []
     for cat in sorted(df["category"].unique().tolist()):
-        s = aggregate_by_k(df, category=cat)
+        s = aggregate_by_k(df, category=cat, x_col=x_col)
         if s.empty:
             continue
         ra = reco_iso_accuracy(s, iso_acc)
-        rc = reco_iso_cost(s, iso_cost)
+        rx = reco_iso_x(s, iso_x)
         rec_rows.append(dict(
             category=cat,
-            iso_acc_target=iso_acc, k_for_iso_acc=ra["k"], acc=round(ra["acc"],3), cost=round(ra["cost"],4), feasible=ra["feasible"],
-            iso_cost_budget=iso_cost, k_for_iso_cost=rc["k"], acc2=round(rc["acc"],3), cost2=round(rc["cost"],4), feasible2=rc["feasible"]
+            iso_accuracy_target=iso_acc, k_for_iso_accuracy=ra["k"], acc=round(ra["acc"],3), x=round(ra["x"],4), feasible=ra["feasible"],
+            iso_budget=iso_x, k_for_iso_budget=rx["k"], acc2=round(rx["acc"],3), x2=round(rx["x"],4), feasible2=rx["feasible"]
         ))
     if rec_rows:
-        st.dataframe(pd.DataFrame(rec_rows))
+        rec_df = pd.DataFrame(rec_rows)
+        st.dataframe(rec_df)
+        md_lines = ["# CoT Auction Recommendations\n"]
+        for r in rec_rows:
+            md_lines.append(f"- [{r['category']}] iso-acc {r['iso_accuracy_target']:.2f}: k={r['k_for_iso_accuracy']} "
+                            f"(acc={r['acc']:.3f}, x={r['x']:.4f}, feasible={r['feasible']})")
+            md_lines.append(f"  [{r['category']}] iso-budget {r['iso_budget']:.2f}: k={r['k_for_iso_budget']} "
+                            f"(acc={r['acc2']:.3f}, x={r['x2']:.4f}, feasible={r['feasible2']})")
+        md_blob = "\n".join(md_lines).encode("utf-8")
+        st.download_button("Download recommendations (Markdown)", data=md_blob, file_name="recommendations.md", mime="text/markdown")
+
+    st.subheader("Data exports")
+    if os.path.exists(rec_path):
+        st.download_button("Download records CSV", data=open(rec_path, "rb").read(), file_name=os.path.basename(rec_path), mime="text/csv")
+    if det_path and os.path.exists(det_path):
+        st.download_button("Download details JSON", data=open(det_path, "rb").read(), file_name=os.path.basename(det_path), mime="application/json")
 
 with right:
     st.subheader("Drill-down (multiple chains and voting)")
@@ -184,4 +206,4 @@ with right:
         st.info("Details JSON not provided, drill-down panel disabled.")
 
 st.markdown("---")
-st.caption("Note: Cost is estimated from per-1K-token prices. With local Ollama configs it is typically 0; adjust config to visualize monetary trade-offs.")
+st.caption("Note: If cost is zero with local models, switch X-axis to latency to compare speed vs accuracy.")
