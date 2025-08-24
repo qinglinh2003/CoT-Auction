@@ -6,8 +6,8 @@ model:
   api_base: "http://localhost:11434/v1"
   api_key_env: "COT_AUCTION_API_KEY"  
   price:
-    input_per_1k: 0.0
-    output_per_1k: 0.0
+    input_per_1k: 0.05
+    output_per_1k: 0.05
 
 strategy:
   k_list: [1, 2, 4, 8]
