@@ -1,4 +1,3 @@
-cat > app_streamlit.py << 'PY'
 import os, glob, json, io
 import numpy as np
 import pandas as pd
@@ -246,4 +245,3 @@ with right:
 
 st.markdown("---")
 st.caption("Note: If cost is zero with local models, switch X-axis to latency to compare speed vs accuracy. Use the sidebar button to update the URL as a shareable permalink.")
-PY
