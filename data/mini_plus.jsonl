@@ -1,0 +1,60 @@
+{"id": "arith_001", "category": "arithmetic", "prompt": "What is 19*13? Give a number.", "answer": "247"}
+{"id": "arith_002", "category": "arithmetic", "prompt": "What is 29*27? Give a number.", "answer": "783"}
+{"id": "arith_003", "category": "arithmetic", "prompt": "What is 26*20? Give a number.", "answer": "520"}
+{"id": "arith_004", "category": "arithmetic", "prompt": "What is 18*46? Give a number.", "answer": "828"}
+{"id": "arith_005", "category": "arithmetic", "prompt": "What is 17*49? Give a number.", "answer": "833"}
+{"id": "arith_006", "category": "arithmetic", "prompt": "What is 39*14? Give a number.", "answer": "546"}
+{"id": "arith_007", "category": "arithmetic", "prompt": "What is 13*17? Give a number.", "answer": "221"}
+{"id": "arith_008", "category": "arithmetic", "prompt": "What is 25*26? Give a number.", "answer": "650"}
+{"id": "arith_009", "category": "arithmetic", "prompt": "What is 44*13? Give a number.", "answer": "572"}
+{"id": "arith_010", "category": "arithmetic", "prompt": "What is 47*24? Give a number.", "answer": "1128"}
+{"id": "arith_011", "category": "arithmetic", "prompt": "What is 46*38? Give a number.", "answer": "1748"}
+{"id": "arith_012", "category": "arithmetic", "prompt": "What is 26*40? Give a number.", "answer": "1040"}
+{"id": "arith_013", "category": "arithmetic", "prompt": "What is 49*29? Give a number.", "answer": "1421"}
+{"id": "arith_014", "category": "arithmetic", "prompt": "What is 12*22? Give a number.", "answer": "264"}
+{"id": "arith_015", "category": "arithmetic", "prompt": "What is 39*33? Give a number.", "answer": "1287"}
+{"id": "unit_001", "category": "unit", "prompt": "Convert 21 minutes to seconds. Give a number (no unit).", "answer": "1260"}
+{"id": "unit_002", "category": "unit", "prompt": "Convert 45 m to centimeters. Give a number (no unit).", "answer": "4500"}
+{"id": "unit_003", "category": "unit", "prompt": "Convert 6.5 km to meters. Give a number (no unit).", "answer": "6500"}
+{"id": "unit_004", "category": "unit", "prompt": "Convert 23.5 km to meters. Give a number (no unit).", "answer": "23500"}
+{"id": "unit_005", "category": "unit", "prompt": "Convert 7 minutes to seconds. Give a number (no unit).", "answer": "420"}
+{"id": "unit_006", "category": "unit", "prompt": "Convert 36 hours to minutes. Give a number (no unit).", "answer": "2160"}
+{"id": "unit_007", "category": "unit", "prompt": "Convert 25.0 km to meters. Give a number (no unit).", "answer": "25000"}
+{"id": "unit_008", "category": "unit", "prompt": "Convert 82 minutes to seconds. Give a number (no unit).", "answer": "4920"}
+{"id": "unit_009", "category": "unit", "prompt": "Convert 75 minutes to seconds. Give a number (no unit).", "answer": "4500"}
+{"id": "unit_010", "category": "unit", "prompt": "Convert 10 m to centimeters. Give a number (no unit).", "answer": "1000"}
+{"id": "unit_011", "category": "unit", "prompt": "Convert 15.5 km to meters. Give a number (no unit).", "answer": "15500"}
+{"id": "unit_012", "category": "unit", "prompt": "Convert 15.0 km to meters. Give a number (no unit).", "answer": "15000"}
+{"id": "unit_013", "category": "unit", "prompt": "Convert 19 hours to minutes. Give a number (no unit).", "answer": "1140"}
+{"id": "unit_014", "category": "unit", "prompt": "Convert 42 hours to minutes. Give a number (no unit).", "answer": "2520"}
+{"id": "unit_015", "category": "unit", "prompt": "Convert 22 minutes to seconds. Give a number (no unit).", "answer": "1320"}
+{"id": "date_001", "category": "date", "prompt": "What is 2023-01-15 plus 25 days? Answer in YYYY-MM-DD.", "answer": "2023-02-09"}
+{"id": "date_002", "category": "date", "prompt": "What is 2022-08-03 plus 45 days? Answer in YYYY-MM-DD.", "answer": "2022-09-17"}
+{"id": "date_003", "category": "date", "prompt": "What is 2022-10-01 plus 47 days? Answer in YYYY-MM-DD.", "answer": "2022-11-17"}
+{"id": "date_004", "category": "date", "prompt": "What is 2023-12-01 plus 44 days? Answer in YYYY-MM-DD.", "answer": "2024-01-14"}
+{"id": "date_005", "category": "date", "prompt": "What is 2022-03-15 plus 41 days? Answer in YYYY-MM-DD.", "answer": "2022-04-25"}
+{"id": "date_006", "category": "date", "prompt": "What is 2023-10-13 plus 13 days? Answer in YYYY-MM-DD.", "answer": "2023-10-26"}
+{"id": "date_007", "category": "date", "prompt": "What is 2023-07-01 plus 49 days? Answer in YYYY-MM-DD.", "answer": "2023-08-19"}
+{"id": "date_008", "category": "date", "prompt": "What is 2022-09-08 plus 13 days? Answer in YYYY-MM-DD.", "answer": "2022-09-21"}
+{"id": "date_009", "category": "date", "prompt": "What is 2023-04-19 plus 27 days? Answer in YYYY-MM-DD.", "answer": "2023-05-16"}
+{"id": "date_010", "category": "date", "prompt": "What is 2022-10-04 plus 43 days? Answer in YYYY-MM-DD.", "answer": "2022-11-16"}
+{"id": "date_011", "category": "date", "prompt": "What is 2023-12-06 plus 38 days? Answer in YYYY-MM-DD.", "answer": "2024-01-13"}
+{"id": "date_012", "category": "date", "prompt": "What is 2022-08-13 plus 46 days? Answer in YYYY-MM-DD.", "answer": "2022-09-28"}
+{"id": "date_013", "category": "date", "prompt": "What is 2022-11-29 plus 56 days? Answer in YYYY-MM-DD.", "answer": "2023-01-24"}
+{"id": "date_014", "category": "date", "prompt": "What is 2024-02-26 plus 52 days? Answer in YYYY-MM-DD.", "answer": "2024-04-18"}
+{"id": "date_015", "category": "date", "prompt": "What is 2022-02-27 plus 17 days? Answer in YYYY-MM-DD.", "answer": "2022-03-16"}
+{"id": "logic_001", "category": "logic", "prompt": "If Alice is taller than Bob and Bob is taller than Carl, is Alice taller than Carl? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_002", "category": "logic", "prompt": "If n is even, is n*56 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_003", "category": "logic", "prompt": "If n is even, is n*14 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_004", "category": "logic", "prompt": "If Alice is taller than Bob and Bob is taller than Carl, is Alice taller than Carl? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_005", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_006", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_007", "category": "logic", "prompt": "If n is even, is n*32 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_008", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_009", "category": "logic", "prompt": "If n is even, is n*56 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_010", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_011", "category": "logic", "prompt": "If n is even, is n*24 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_012", "category": "logic", "prompt": "If n is even, is n*22 always even? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_013", "category": "logic", "prompt": "If Alice is taller than Bob and Bob is taller than Carl, is Alice taller than Carl? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_014", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}
+{"id": "logic_015", "category": "logic", "prompt": "All bloops are fuzzles. All fuzzles are snorps. Are all bloops snorps? Answer YES or NO.", "answer": "YES"}

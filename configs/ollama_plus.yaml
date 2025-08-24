@@ -1,0 +1,12 @@
+dataset_path: "data/mini_plus.jsonl"
+
+strategy:
+  k_list: [1, 2, 4, 8]
+  max_steps: 12
+  temperature: 0.7
+
+model:
+  provider: "openai_like"
+  name: "qwen2.5:7b-instruct"   
+  api_base: "http://localhost:11434/v1"
+  price: { input_per_1k: 0.00, output_per_1k: 0.00 } 
